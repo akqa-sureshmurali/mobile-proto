@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="screenshots/hero.png" alt="MobileProto — realistic phone frame for your mobile-first web app" width="720" />
+  <img src="https://raw.githubusercontent.com/akqa-sureshmurali/mobile-proto/main/screenshots/hero.png" alt="MobileProto — realistic phone frame for your mobile-first web app" width="720" />
 </p>
 
 <h1 align="center">MobileProto</h1>
@@ -76,13 +76,13 @@ Choose from 5 built-in backgrounds via the `backgroundPreset` prop:
 
 <table>
   <tr>
-    <td align="center"><img src="screenshots/preset-dark.png" width="240" alt="dark" /><br /><code>dark</code></td>
-    <td align="center"><img src="screenshots/preset-gradient.png" width="240" alt="gradient" /><br /><code>gradient</code></td>
-    <td align="center"><img src="screenshots/preset-mesh.png" width="240" alt="mesh" /><br /><code>mesh</code></td>
+    <td align="center"><img src="https://raw.githubusercontent.com/akqa-sureshmurali/mobile-proto/main/screenshots/preset-dark.png" width="240" alt="dark" /><br /><code>dark</code></td>
+    <td align="center"><img src="https://raw.githubusercontent.com/akqa-sureshmurali/mobile-proto/main/screenshots/preset-gradient.png" width="240" alt="gradient" /><br /><code>gradient</code></td>
+    <td align="center"><img src="https://raw.githubusercontent.com/akqa-sureshmurali/mobile-proto/main/screenshots/preset-mesh.png" width="240" alt="mesh" /><br /><code>mesh</code></td>
   </tr>
   <tr>
-    <td align="center"><img src="screenshots/preset-blur.png" width="240" alt="blur" /><br /><code>blur</code></td>
-    <td align="center"><img src="screenshots/preset-light.png" width="240" alt="light" /><br /><code>light</code></td>
+    <td align="center"><img src="https://raw.githubusercontent.com/akqa-sureshmurali/mobile-proto/main/screenshots/preset-blur.png" width="240" alt="blur" /><br /><code>blur</code></td>
+    <td align="center"><img src="https://raw.githubusercontent.com/akqa-sureshmurali/mobile-proto/main/screenshots/preset-light.png" width="240" alt="light" /><br /><code>light</code></td>
     <td></td>
   </tr>
 </table>
