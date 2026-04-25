@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MobileProto Demo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  /* ─── Shared shell ─── */
+  .mp-desktop-shell {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 0;
+  }
+
+  .mp-phone-container {
+    position: relative;
+    width: 451px;
+    height: 914px;
+    flex-shrink: 0;
+    z-index: 1;
+  }
+
+  .mp-phone-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .mp-screen-area {
+    position: absolute;
+    top: 18.88px;
+    left: 22.34px;
+    width: 401.66px;
+    height: 869.24px;
+    border-radius: 56.645px;
+    overflow: hidden;
+    z-index: 1;
+    background: #000;
+  }
+
+  /* ─── Fake mobile app inside screen ─── */
+  .fake-app {
+    width: 100%;
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+    color: #fff;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Status bar */
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 28px 8px;
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .status-bar .time { font-size: 16px; font-weight: 700; }
+  .status-icons { display: flex; gap: 6px; align-items: center; }
+  .status-icons svg { width: 18px; height: 18px; }
+
+  /* App header */
+  .app-header {
+    padding: 8px 24px 16px;
+  }
+  .app-header h1 {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+  }
+
+  /* Story circles */
+  .stories {
+    display: flex;
+    gap: 14px;
+    padding: 12px 24px;
+    overflow-x: auto;
+  }
+  .story {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .story-ring {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    padding: 3px;
+    background: linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  }
+  .story-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #000;
+  }
+  .story-name {
+    font-size: 11px;
+    color: rgba(255,255,255,0.7);
+    max-width: 64px;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Cards */
+  .card {
+    margin: 12px 20px;
+    border-radius: 20px;
+    overflow: hidden;
+  }
+  .card-image {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    display: block;
+  }
+  .card-body {
+    padding: 16px 18px;
+  }
+  .card-title {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .card-subtitle {
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+  }
+  .card-actions {
+    display: flex;
+    gap: 16px;
+    padding: 8px 18px 16px;
+  }
+  .card-actions svg { width: 24px; height: 24px; }
+
+  /* Tab bar */
+  .tab-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 83px;
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
+    padding-top: 10px;
+    border-top: 0.5px solid rgba(255,255,255,0.15);
+    z-index: 5;
+  }
+  .tab-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    color: rgba(255,255,255,0.4);
+  }
+  .tab-item.active { color: #fff; }
+  .tab-item svg { width: 24px; height: 24px; }
+  .home-indicator {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 134px;
+    height: 5px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.3);
+  }
+
+  /* Gradient placeholders */
+  .gradient-1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+  .gradient-2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+  .gradient-3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+  .avatar-1 { background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); }
+  .avatar-2 { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); }
+  .avatar-3 { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); }
+  .avatar-4 { background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%); }
+  .avatar-5 { background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%); }
+
+  /* ─── Background presets ─── */
+  .bg-dark { background: #0a0a0a; }
+  .bg-gradient { background: linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 50%, #16213e 100%); }
+  .bg-mesh {
+    background:
+      radial-gradient(at 20% 25%, #1a0533 0%, transparent 50%),
+      radial-gradient(at 80% 80%, #0d1b2a 0%, transparent 50%),
+      radial-gradient(at 50% 50%, #0a0a0a 0%, transparent 80%),
+      #0a0a0a;
+  }
+  .bg-blur {
+    background: radial-gradient(ellipse at 30% 50%, rgba(56, 56, 80, 0.6) 0%, #0a0a0a 70%);
+  }
+  .bg-light { background: #f5f5f5; }
+</style>
+</head>
+<body>
+
+<!-- The page uses query params: ?preset=dark|gradient|mesh|blur|light&scale=0.85 -->
+<script>
+const params = new URLSearchParams(location.search);
+const preset = params.get('preset') || 'dark';
+const scale = parseFloat(params.get('scale') || '1');
+</script>
+
+<div id="shell" class="mp-desktop-shell">
+  <div id="phone" class="mp-phone-container">
+    <div class="mp-screen-area">
+      <div class="fake-app" style="background:#000;">
+        <!-- Status bar -->
+        <div class="status-bar">
+          <span class="time">9:41</span>
+          <div class="status-icons">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3a4.237 4.237 0 00-6 0zm-4-4l2 2a7.074 7.074 0 0110 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+          </div>
+        </div>
+
+        <!-- Header -->
+        <div class="app-header">
+          <h1>Explore</h1>
+        </div>
+
+        <!-- Stories -->
+        <div class="stories">
+          <div class="story"><div class="story-ring"><div class="story-avatar avatar-1"></div></div><span class="story-name">Design</span></div>
+          <div class="story"><div class="story-ring"><div class="story-avatar avatar-2"></div></div><span class="story-name">Travel</span></div>
+          <div class="story"><div class="story-ring"><div class="story-avatar avatar-3"></div></div><span class="story-name">Music</span></div>
+          <div class="story"><div class="story-ring"><div class="story-avatar avatar-4"></div></div><span class="story-name">Code</span></div>
+          <div class="story"><div class="story-ring"><div class="story-avatar avatar-5"></div></div><span class="story-name">Food</span></div>
+        </div>
+
+        <!-- Card 1 -->
+        <div class="card">
+          <div class="card-image gradient-1"></div>
+          <div class="card-body">
+            <div class="card-title">Mountain Retreat</div>
+            <div class="card-subtitle">Explore the wilderness</div>
+          </div>
+          <div class="card-actions">
+            <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="card">
+          <div class="card-image gradient-2"></div>
+          <div class="card-body">
+            <div class="card-title">Sunset Vibes</div>
+            <div class="card-subtitle">Golden hour moments</div>
+          </div>
+          <div class="card-actions">
+            <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          </div>
+        </div>
+
+        <!-- Tab bar -->
+        <div class="tab-bar" style="background: rgba(0,0,0,0.85); backdrop-filter: blur(20px);">
+          <div class="tab-item active">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            <span>Home</span>
+          </div>
+          <div class="tab-item">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            <span>Search</span>
+          </div>
+          <div class="tab-item">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            <span>Favorites</span>
+          </div>
+          <div class="tab-item">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            <span>Profile</span>
+          </div>
+          <div class="home-indicator"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phone SVG frame - inline for self-containment -->
+    <svg class="mp-phone-svg" width="451" height="914" viewBox="0 0 451 914" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g clip-path="url(#ss-clip0)"><g filter="url(#ss-f0)"><rect width="3.462" height="108.018" rx="0.346" transform="matrix(-1 0 0 1 449.73 276.624)" fill="#DEDEDE" /><rect x="0.173" y="-0.173" width="3.808" height="108.364" rx="0.519" transform="matrix(-1 0 0 1 450.077 276.624)" stroke="black" stroke-width="0.346" /></g><g filter="url(#ss-f1)"><rect x="0.173" y="-0.173" width="3.116" height="107.672" rx="0.242" transform="matrix(-1 0 0 1 449.725 276.969)" stroke="#FAFAF8" stroke-width="0.346" /></g></g>
+      <g clip-path="url(#ss-clip1)"><g filter="url(#ss-f4)"><rect x="0.34" y="186.608" width="3.462" height="32.89" rx="0.346" fill="#DEDEDE" /><rect x="0.167" y="186.435" width="3.808" height="33.236" rx="0.519" stroke="black" stroke-width="0.346" /></g></g>
+      <g clip-path="url(#ss-clip2)"><g filter="url(#ss-f8)"><rect x="0.34" y="252.042" width="3.462" height="69.242" rx="0.346" fill="#DEDEDE" /><rect x="0.167" y="251.869" width="3.808" height="69.589" rx="0.519" stroke="black" stroke-width="0.346" /></g></g>
+      <g clip-path="url(#ss-clip3)"><g filter="url(#ss-f12)"><rect x="0.34" y="339.98" width="3.462" height="69.242" rx="0.346" fill="#DEDEDE" /><rect x="0.167" y="339.807" width="3.808" height="69.589" rx="0.519" stroke="black" stroke-width="0.346" /></g></g>
+      <g clip-path="url(#ss-clip4)" mask="url(#ss-screenCutout)">
+        <rect x="3.457" width="439.425" height="907" rx="72.093" fill="black" />
+        <rect x="7.403" y="3.948" width="431.529" height="899.104" rx="68.145" stroke="#515868" stroke-width="4.463" />
+        <rect x="4.315" y="0.858" width="437.708" height="905.284" rx="71.235" stroke="#303640" stroke-width="1.717" />
+        <g opacity="0.9"><rect x="5.172" y="2.06" width="435.992" height="903.224" rx="70.72" stroke="#717989" stroke-width="1.717" /></g>
+        <rect x="159.66" y="32.614" width="127.021" height="37.077" rx="18.538" fill="black" />
+        <g opacity="0.75">
+          <rect x="252.695" y="42.569" width="17.165" height="17.165" rx="8.583" fill="#121212" />
+          <rect x="252.695" y="42.569" width="17.165" height="17.165" rx="8.583" stroke="#0E0E0E" stroke-width="0.687" />
+        </g>
+        <g opacity="0.4">
+          <rect width="24.718" height="24.718" rx="12.359" transform="matrix(-1 0 0 1 190.559 38.793)" fill="#141414" />
+          <rect width="16.067" height="16.067" rx="8.033" transform="matrix(-1 0 0 1 186.23 43.118)" fill="black" />
+        </g>
+      </g>
+      <defs>
+        <mask id="ss-screenCutout"><rect width="100%" height="100%" fill="white" /><rect x="22.34" y="18.88" width="401.66" height="869.24" rx="56.645" fill="black" /></mask>
+        <filter id="ss-f0" x="445.576" y="275.931" width="4.849" height="109.403" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="bg" /><feBlend in="SourceGraphic" in2="bg" result="s" /><feGaussianBlur stdDeviation="0.173" result="e" /></filter>
+        <filter id="ss-f1" x="445.916" y="276.277" width="4.157" height="108.71" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="bg" /><feBlend in="SourceGraphic" in2="bg" result="s" /><feGaussianBlur stdDeviation="0.173" result="e" /></filter>
+        <filter id="ss-f4" x="-0.354" y="185.916" width="4.849" height="34.275" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="bg" /><feBlend in="SourceGraphic" in2="bg" result="s" /><feGaussianBlur stdDeviation="0.173" result="e" /></filter>
+        <filter id="ss-f8" x="-0.354" y="251.35" width="4.849" height="70.627" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="bg" /><feBlend in="SourceGraphic" in2="bg" result="s" /><feGaussianBlur stdDeviation="0.173" result="e" /></filter>
+        <filter id="ss-f12" x="-0.354" y="339.288" width="4.849" height="70.627" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="bg" /><feBlend in="SourceGraphic" in2="bg" result="s" /><feGaussianBlur stdDeviation="0.173" result="e" /></filter>
+        <clipPath id="ss-clip0"><path d="M450.07 276.97c0-.383-.31-.693-.692-.693h-2.77v108.711h2.77c.382 0 .692-.31.692-.693V276.97Z" fill="white" /></clipPath>
+        <clipPath id="ss-clip1"><path d="M0 186.954c0-.382.31-.692.692-.692h2.77v33.582H.692A.692.692 0 010 219.152v-32.198Z" fill="white" /></clipPath>
+        <clipPath id="ss-clip2"><path d="M0 252.389c0-.383.31-.693.692-.693h2.77v69.935H.692A.692.692 0 010 320.939v-68.55Z" fill="white" /></clipPath>
+        <clipPath id="ss-clip3"><path d="M0 340.326c0-.382.31-.692.692-.692h2.77v69.935H.692A.692.692 0 010 408.876v-68.55Z" fill="white" /></clipPath>
+        <clipPath id="ss-clip4"><rect x="3.457" width="439.425" height="907" rx="72.093" fill="white" /></clipPath>
+      </defs>
+    </svg>
+  </div>
+</div>
+
+<script>
+  const shell = document.getElementById('shell');
+  shell.className = 'mp-desktop-shell bg-' + preset;
+
+  const phone = document.getElementById('phone');
+  if (scale !== 1) {
+    const marginV = -(914 * (1 - scale)) / 2;
+    const marginH = -(451 * (1 - scale)) / 2;
+    phone.style.transform = 'scale(' + scale + ')';
+    phone.style.margin = marginV + 'px ' + marginH + 'px';
+  }
+</script>
+</body>
+</html>
